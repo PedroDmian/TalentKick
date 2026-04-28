@@ -1,0 +1,109 @@
+tags:
+  - name: Users
+    description: |
+      Endpoints para gestión de usuarios.
+      **Reglas de Visibilidad de Perfil:**
+      - **Administradores y Reclutadores:** Pueden ver el perfil completo (incluye email y fecha de nacimiento).
+      - **Usuarios normales:** Solo pueden ver datos públicos (nombre, apellido, avatar, rol).
+
+paths:
+  /users:
+    get:
+      summary: Obtiene todos los usuarios
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        200:
+          description: Lista de usuarios. Los campos visibles dependen del rol del solicitante.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    get:
+      summary: Obtiene un usuario por ID
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Datos del usuario. Los campos visibles dependen del rol del solicitante.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          description: Usuario no encontrado
+    
+    put:
+      summary: Actualiza un usuario
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                lastname:
+                  type: string
+                birthdate:
+                  type: string
+                  format: date-time
+                avatar:
+                  type: string
+      responses:
+        200:
+          description: Usuario actualizado
+    
+    delete:
+      summary: Elimina un usuario (soft delete)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Usuario eliminado

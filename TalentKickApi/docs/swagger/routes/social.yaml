@@ -1,0 +1,81 @@
+tags:
+  - name: Follows
+    description: Endpoints para seguimiento de usuarios
+  - name: Connections
+    description: Endpoints para conexiones entre recruiters y usuarios
+  - name: Notifications
+    description: Endpoints para notificaciones de usuario
+
+paths:
+  /follows/{followingId}:
+    post:
+      summary: Seguir a un usuario
+      tags: [Follows]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: followingId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Usuario seguido exitosamente
+
+  /connections/request:
+    post:
+      summary: Solicitar contacto (Solo Recruiters)
+      tags: [Connections]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requestedId]
+              properties:
+                requestedId:
+                  type: string
+                  format: uuid
+      responses:
+        201:
+          description: Solicitud de conexión enviada
+        400:
+          description: Error en la solicitud (ej. no es recruiter)
+
+  /notifications:
+    get:
+      summary: Listar notificaciones del usuario
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Lista de notificaciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+  /notifications/{id}/read:
+    patch:
+      summary: Marcar notificación como leída
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Notificación marcada como leída

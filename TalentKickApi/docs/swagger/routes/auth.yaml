@@ -1,0 +1,115 @@
+tags:
+  - name: Auth
+    description: Endpoints para autenticación y registro
+
+paths:
+  /auth/register:
+    post:
+      summary: Registra un nuevo usuario
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - lastname
+                - email
+                - sessionType
+              properties:
+                name:
+                  type: string
+                lastname:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                sessionType:
+                  type: string
+                  enum: [email, google, apple]
+      responses:
+        201:
+          description: Usuario registrado
+        400:
+          description: Error en el registro
+
+  /auth/login:
+    post:
+      summary: Inicia sesión con email
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Login exitoso
+        401:
+          description: Credenciales inválidas
+
+  /auth/login-google:
+    post:
+      summary: Inicia sesión con Google
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [idToken]
+              properties:
+                idToken:
+                  type: string
+      responses:
+        200:
+          description: Login exitoso
+
+  /auth/login-apple:
+    post:
+      summary: Inicia sesión con Apple
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [idToken]
+              properties:
+                idToken:
+                  type: string
+      responses:
+        200:
+          description: Login exitoso
+
+  /auth/refresh-token:
+    post:
+      summary: Renueva el access token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        200:
+          description: Token renovado

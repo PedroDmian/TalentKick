@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  recruiter
+  user
+}
+
+model User {
+  id        String    @id @default(uuid())
+  role      Role      @default(user)
+  type      String?   // Mantenido por compatibilidad
+  name      String
+  lastname  String    @map("lastName")
+  bio       String?
+  birthdate DateTime? @map("birthDate")
+  avatar    String?
+  email     String    @unique
+  password  String?
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime  @default(now()) @map("createdAt")
+  updatedAt DateTime  @updatedAt @map("updatedAt")
+  deletedAt DateTime? @map("deletedAt")
+
+  feeds     Feed[]
+  comments  Comment[]
+  
+  // Galería de Perfil
+  gallery   UserArchive[]
+
+  // Relaciones de Seguimiento
+  followers Follow[] @relation("following")
+  following Follow[] @relation("follower")
+
+  // Relaciones de Conexión
+  sentConnections     Connection[] @relation("requester")
+  receivedConnections Connection[] @relation("requested")
+
+  // Notificaciones
+  notifications Notification[]
+
+  @@map("user")
+}
+
+model UserArchive {
+  id        String   @id @default(uuid())
+  userId    String   @map("userId")
+  archiveId String   @map("archiveId")
+  createdAt DateTime @default(now()) @map("createdAt")
+
+  user      User     @relation(fields: [userId], references: [id])
+  archive   Archive  @relation(fields: [archiveId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, archiveId])
+  @@map("userArchive")
+}
+
+model Feed {
+  id          String        @id @default(uuid())
+  userId      String        @map("userId")
+  description String
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime      @default(now()) @map("createdAt")
+  updatedAt   DateTime      @updatedAt @map("updatedAt")
+  deletedAt   DateTime?     @map("deletedAt")
+  archives    FeedArchives[]
+  comments    Comment[]
+
+  user        User          @relation(fields: [userId], references: [id])
+
+  @@map("feed")
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  feedId    String    @map("feedId")
+  userId    String    @map("userId")
+  content   String
+  createdAt DateTime  @default(now()) @map("createdAt")
+  updatedAt DateTime  @updatedAt @map("updatedAt")
+  deletedAt DateTime? @map("deletedAt")
+
+  feed      Feed      @relation(fields: [feedId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@map("comment")
+}
+
+model Follow {
+  followerId  String @map("followerId")
+  followingId String @map("followingId")
+  createdAt   DateTime @default(now()) @map("createdAt")
+
+  follower    User @relation("follower", fields: [followerId], references: [id])
+  following   User @relation("following", fields: [followingId], references: [id])
+
+  @@id([followerId, followingId])
+  @@map("follow")
+}
+
+model Connection {
+  id          String   @id @default(uuid())
+  requesterId String   @map("requesterId")
+  requestedId String   @map("requestedId")
+  status      String   @default("pending") // pending, accepted, rejected
+  createdAt   DateTime @default(now()) @map("createdAt")
+  updatedAt   DateTime @updatedAt @map("updatedAt")
+
+  requester   User @relation("requester", fields: [requesterId], references: [id])
+  requested   User @relation("requested", fields: [requestedId], references: [id])
+
+  @@unique([requesterId, requestedId])
+  @@map("connection")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("userId")
+  type      String   // follow, connection_request, comment, etc.
+  title     String
+  message   String
+  referenceId String? // ID del objeto relacionado (feedId, commentId, etc)
+  isRead    Boolean  @default(false) @map("isRead")
+  createdAt DateTime @default(now()) @map("createdAt")
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("notification")
+}
+
+model Archive {
+  id          String        @id @default(uuid())
+  url         String
+  type        String
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime      @default(now()) @map("createdAt")
+  updatedAt   DateTime      @updatedAt @map("updatedAt")
+  deletedAt   DateTime?     @map("deletedAt")
+  feedArchives FeedArchives[]
+  userArchives UserArchive[]
+
+  @@map("archive")
+}
+
+model FeedArchives {
+  id          String    @id @default(uuid())
+  feedId      String    @map("feedId")
+  archiveId   String    @map("archiveId")
+  createdAt   DateTime  @default(now()) @map("createdAt")
+  updatedAt   DateTime  @updatedAt @map("updatedAt")
+  deletedAt   DateTime? @map("deletedAt")
+
+  feed        Feed      @relation(fields: [feedId], references: [id])
+  archive     Archive   @relation(fields: [archiveId], references: [id], onDelete: Cascade)
+
+  @@unique([feedId, archiveId])
+
+  @@map("feedArchives")
+}
