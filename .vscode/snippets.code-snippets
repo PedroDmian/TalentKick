@@ -1,0 +1,24 @@
+{
+	"MainContainerScreen Component": {
+		"prefix": "ncp",
+		"body": [
+			"import { Text, View } from 'react-native';",
+			"",
+			"const ${1:MainContainerScreen} = () => {",
+			"  return (",
+			"    <View className='flex-1 bg-white justify-center items-center'>",
+			"      <Text className='text-dark text-4xl font-monaExtraBold tracking-widest'>",
+			"        ${2:Main Container Screen}",
+			"      </Text>",
+			"      <Text className='text-dark text-2xl font-mona mt-2'>",
+			"        ${3:This is the main container screen.}",
+			"      </Text>",
+			"    </View>",
+			"  );",
+			"}",
+			"",
+			"export default $1;"
+		],
+		"description": "Crea un componente de pantalla principal en React Native con Tailwind."
+	}
+}
